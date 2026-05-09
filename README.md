@@ -2,8 +2,6 @@
 
 把日常 GitLab 操作（看 MR / 跑 CI / review / 处理 AI 反馈）封装成一组可复用 skill，**不用记 glab 命令**，同时提供 Claude Code plugin 配置与 Codex plugin 配置。
 
-> ℹ️ 如果你当前还没把仓库 push 到 `https://github.com/itMrBoy/glab_skills.git`，请先使用本地路径安装；远程安装路径要等首次 push 成功后才能给团队成员使用。
-
 ## 安装
 
 重启 Claude Code 后，输入 `/` 即可看到 `/glab:setup`、`/glab:mr` 等命令。
