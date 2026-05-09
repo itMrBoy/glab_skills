@@ -6,13 +6,6 @@
 
 ## 安装
 
-### Claude Code（本地路径）
-
-```powershell
-claude plugin marketplace add C:\code\glab_skills
-claude plugin install glab@snow-glab-marketplace
-```
-
 重启 Claude Code 后，输入 `/` 即可看到 `/glab:setup`、`/glab:mr` 等命令。
 
 ### Claude Code（团队成员，从远程仓库拉取）
@@ -21,10 +14,7 @@ claude plugin install glab@snow-glab-marketplace
 # 从 GitHub
 claude plugin marketplace add https://github.com/itMrBoy/glab_skills.git
 claude plugin install glab@snow-glab-marketplace
-
-# 或 GitHub 简写
-claude plugin marketplace add itMrBoy/glab_skills
-claude plugin install glab@snow-glab-marketplace
+/reload-plugins
 ```
 
 ### Codex CLI / Codex Plugin
@@ -33,6 +23,11 @@ claude plugin install glab@snow-glab-marketplace
 
 - `.codex-plugin/plugin.json`：声明 `glab` plugin 及 `skills: "./skills/"`
 - `.agents/plugins/marketplace.json`：用于描述本地 Codex marketplace 插件入口
+
+最简单的方式：将以下提示词发送给Codex CLI，并根据提示授权即可：
+```powershell
+帮我安装这个skills：https://github.com/itMrBoy/glab_skills.git
+```
 
 如果你的 Codex 环境直接读取 repo 根下的 `.codex-plugin/plugin.json`，当前仓库已经具备最小可用的 plugin manifest。
 
