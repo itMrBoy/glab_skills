@@ -1,0 +1,9 @@
+{
+  "name": "glab",
+  "version": "0.1.2",
+  "description": "GitLab CLI (glab) 快捷 skill 集合，含 AI review 评论解析与修复 plan，跨 Claude Code / Codex CLI 通用",
+  "author": {
+    "name": "liminghu",
+    "email": "liminghu@snowtech.com.cn"
+  }
+}

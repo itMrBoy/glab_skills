@@ -1,0 +1,14 @@
+{
+  "name": "snow-glab-marketplace",
+  "owner": {
+    "name": "snow_workspace_group"
+  },
+  "description": "Snow 团队 Claude Code 插件分发源",
+  "plugins": [
+    {
+      "name": "glab",
+      "source": "./",
+      "description": "GitLab CLI (glab) 快捷 skill 集合，含 AI review 评论解析与修复 plan"
+    }
+  ]
+}
