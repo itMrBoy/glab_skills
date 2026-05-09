@@ -17,6 +17,8 @@
 |---|---|
 | `.claude-plugin/plugin.json` 任一字段 | `reference/plugin-manifest.md` |
 | `.claude-plugin/marketplace.json` 任一字段 | `reference/plugin-manifest.md` |
+| `.codex-plugin/plugin.json` 任一字段 | `reference/plugin-manifest.md` |
+| `.agents/plugins/marketplace.json` 任一字段 | `reference/plugin-manifest.md` |
 | README 安装/升级片段 | `reference/plugin-manifest.md` + `memory/doc-gaps.md`（确认是否触发已知 gap） |
 
 ## 增加 / 重构
@@ -25,14 +27,14 @@
 |---|---|
 | 加新 skill | `guides/add-new-skill.md` |
 | 升级 / 分发 plugin | `guides/release-and-distribute.md` |
-| 引入新 manifest 字段（如 `argument-hint`、`hooks`） | `reference/plugin-manifest.md` 然后扩展 |
+| 引入新 manifest 字段（Claude / Codex） | `reference/plugin-manifest.md` 然后扩展 |
 
 ## 出错 / 混乱
 
 | 现象 | 先读 |
 |---|---|
-| 用户报告"装不上 / 拉不到" | `memory/doc-gaps.md`（README 拉取路径目前不可用） |
+| 用户报告"装不上 / 拉不到" | `memory/doc-gaps.md`（GitHub 安装链路 / 路径对齐相关 gap） |
 | 跨平台路径报错（cmd 下 `/tmp` 解析失败等） | `memory/doc-gaps.md`（`/tmp` 跨平台 gap） |
 | `glab auth status` 通过但 MR 命令失败 | `memory/doc-gaps.md`（hostname 不一致 gap） |
-| 不清楚为什么这么设计 | `memory/reflections/`（暂空） |
+| 不清楚为什么这么设计 | `memory/reflections/` |
 | 重大架构选择背后的 why | `memory/decisions/`（暂空） |

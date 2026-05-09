@@ -2,7 +2,7 @@
 
 ## Identity
 
-一个 Claude Code plugin，把 snow 团队最常用的 GitLab 操作（看 MR / 创 MR / 看 CI / 看 diff / 看领先 commit）和 AI review 工作流封装成 8 个自然语言可触发的 skill。所有 skill 通过 `/glab:<name>` 调用，输出统一为中文 Markdown。
+一个以 Claude Code 为主、同时提供 Codex plugin 元数据的 skill 仓库，把 snow 团队最常用的 GitLab 操作（看 MR / 创 MR / 看 CI / 看 diff / 看领先 commit）和 AI review 工作流封装成 8 个自然语言可触发的 skill。Claude 侧通过 `/glab:<name>` 调用；Codex 侧复用同一套 `skills/` 目录与 plugin manifest。
 
 - Plugin name：`glab`
 - Marketplace name：`snow-glab-marketplace`
@@ -44,7 +44,7 @@
 
 ### D. Plugin 骨架与分发
 
-`.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` + `README.md`。单 plugin 仓库，`source: "./"`。详见 `reference/plugin-manifest.md`。
+`.claude-plugin/plugin.json` + `.claude-plugin/marketplace.json` + `.codex-plugin/plugin.json` + `.agents/plugins/marketplace.json` + `README.md`。当前仓库在同一套 `skills/` 上同时维护 Claude 与 Codex 的接入元数据；其中 Codex marketplace 路径仍需与最终 plugin 根目录保持一致。详见 `reference/plugin-manifest.md`。
 
 ## 关键设计立场
 
@@ -52,3 +52,4 @@
 2. **plan-only 评审**——review skill 只读、不动代码、不动 GitLab 状态。
 3. **降级可见**——llmdoc 缺失时 review skill 不静默降级，必须在报告头标注"未加载项目专属规范"。
 4. **约定优于配置**——SKILL.md frontmatter 仅 3 字段（`name` / `description` / `allowed-tools`），命令名靠目录名 + plugin name 自动拼接。
+5. **同一 skill 源，多入口接入**——Claude Code 走 plugin/marketplace，Codex 走 `.codex-plugin` 或 skill path；兼容性按语义保证，不承诺工具 ID 完全一致。

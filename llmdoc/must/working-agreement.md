@@ -46,7 +46,7 @@
 
 ## 工具命名（Claude Code 专属）
 
-frontmatter `allowed-tools` 用 PascalCase：`Bash`、`Read`、`Glob`、`Grep`。Codex CLI 协议层不识别这些工具名，README 的"完全跨工具兼容"声明在严格意义上不成立——见 `memory/doc-gaps.md`。
+frontmatter `allowed-tools` 用 PascalCase：`Bash`、`Read`、`Glob`、`Grep`。Codex CLI 协议层不识别这些工具名；当前 README 已改成“语义可移植”，但协议层兼容仍未成立——见 `memory/doc-gaps.md` G2。
 
 ## 用户参数读取
 

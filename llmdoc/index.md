@@ -1,6 +1,6 @@
 # llmdoc 全局导航
 
-`glab` Claude Code plugin 的稳定文档地图。每条任务先来这里查"该读哪份"，再深入文档本体。
+`glab` 在 Claude Code / Codex 双生态下的稳定文档地图。每条任务先来这里查"该读哪份"，再深入文档本体。
 
 ## 类别用途
 
@@ -16,7 +16,7 @@
 ## 文档清单
 
 ### must/
-- `must/project-basics.md` — plugin/marketplace/skill 三层身份、8 个 skill 一句话索引、外部依赖、仓库当前状态。
+- `must/project-basics.md` — Claude/Codex 双入口身份、8 个 skill 一句话索引、外部依赖、仓库当前状态。
 - `must/working-agreement.md` — 跨 skill 共享的强约束（不动用户环境、不写 git、不 auto-resolve 等）与降级策略。
 - `must/doc-routing.md` — 任务到文档的快速路由表。
 
@@ -28,25 +28,25 @@
 - `architecture/review-pipeline.md` — `review-mr` 与 `review-fixup` 双路评审管线：触发 / 数据获取 / llmdoc 加载策略对比 / 评审维度与桶分类 / 输出契约 / 安全边界 / 被评审项目的 llmdoc 期望结构。
 
 ### reference/
-- `reference/plugin-manifest.md` — `plugin.json` / `marketplace.json` / SKILL.md frontmatter 字段语义；命令前缀映射规则；`.claude-plugin/` vs `.claude/` 区分；触发短语机制。
+- `reference/plugin-manifest.md` — `.claude-plugin/` / `.codex-plugin/` / `.agents/plugins/marketplace.json` / SKILL.md frontmatter 字段语义；命令前缀映射规则；分发目录区分；触发短语机制。
 - `reference/coding-conventions.md` — SKILL.md 结构、命名规范、中文 Markdown 输出风格、emoji 词汇、Bash/glab/jq one-liner 规范、反模式列表（`review-mr` readability 维度依据）。
 
 ### guides/
 - `guides/add-new-skill.md` — 端到端流程：选名 → 三件套 frontmatter → Preconditions 模板 → /tmp 决策 → 接入推荐图 → 验证。
-- `guides/release-and-distribute.md` — 三种场景：本地迭代、首次发布到 GitHub、团队成员升级；含 `marketplace update` 与 plugin.json 版本号策略。
+- `guides/release-and-distribute.md` — Claude Code 与 Codex 的本地迭代、首次发布、团队升级路径；含 `marketplace update`、plugin.json 版本号与 Codex 接入提示。
 
 ### memory/
-- `memory/doc-gaps.md` — 已知文档/实现 gap 与建议补救（README 拉取路径不可用、跨工具兼容声明矛盾、`/tmp` 跨平台、`auth status --hostname` 不一致等）。
+- `memory/doc-gaps.md` — 已知文档/实现 gap 与建议补救（跨工具兼容声明矛盾、`/tmp` 跨平台、`auth status --hostname` 不一致、Codex marketplace 路径对齐等）。
 - `memory/decisions/` — 重要决策记录（暂空）。
-- `memory/reflections/` — reflector 输出（暂空）。
+- `memory/reflections/` — reflector 输出（含 Codex plugin 配置落库后的 README / llmdoc 对齐反思）。
 
 ## 路由提示
 
 - 改某个 skill → 先读 `architecture/skill-system.md` 的"共享约定"段。
 - 改 review-mr / review-fixup → 先读 `architecture/review-pipeline.md`。
-- 改 `plugin.json` / `marketplace.json` / SKILL.md frontmatter → 先读 `reference/plugin-manifest.md`。
+- 改 `.claude-plugin/plugin.json` / `.claude-plugin/marketplace.json` / `.codex-plugin/plugin.json` / `.agents/plugins/marketplace.json` / SKILL.md frontmatter → 先读 `reference/plugin-manifest.md`。
 - 加新 skill → 先读 `guides/add-new-skill.md`。
 - 安装 / 分发 / 发版 → 先读 `guides/release-and-distribute.md`。
-- 失败/混乱 → 翻 `memory/reflections/`（暂空）与 `memory/doc-gaps.md`。
+- 失败/混乱 → 翻 `memory/reflections/` 与 `memory/doc-gaps.md`。
 
 > 启动顺序见 `startup.md`，本文不重复。

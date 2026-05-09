@@ -2,19 +2,21 @@
 
 ## 身份
 
-`glab` 是 Claude Code plugin（**纯 skill-only**，无 commands/agents/hooks/mcp_servers）。
+`glab` 是以 Claude Code 为主、同时补充 Codex plugin 元数据的 skill 仓库。
 - 归属团队：`snow_workspace_group`（marketplace.json#owner.name）。
-- 作者：`blank3 <liminghu@snowtech.com.cn>`（plugin.json#author）。
+- 作者：`liminghu <liminghu@snowtech.com.cn>`（plugin.json#author）。
 - 默认 GitLab host：`git.snowsse.cn`（仅在 `setup` skill 显式声明，其它 skill 依赖 glab 默认 host）。
 - 远端仓库：`https://github.com/itMrBoy/glab_skills.git`（git remote）。
 
-## 三层身份映射
+## 双入口身份映射
 
 | 层 | 字段 | 决定什么 |
 |---|---|---|
-| Plugin | `.claude-plugin/plugin.json#name = "glab"` | slash 命令前缀 `/glab:`。 |
-| Marketplace | `.claude-plugin/marketplace.json#name = "snow-glab-marketplace"` | 安装命令 `@snow-glab-marketplace`。 |
-| Skill | `skills/<dir>/SKILL.md` frontmatter `name`（必须 = 父目录名） | slash 命令后缀 `/glab:<name>`。 |
+| Claude Plugin | `.claude-plugin/plugin.json#name = "glab"` | slash 命令前缀 `/glab:`。 |
+| Claude Marketplace | `.claude-plugin/marketplace.json#name = "snow-glab-marketplace"` | Claude 安装命令 `@snow-glab-marketplace`。 |
+| Codex Plugin | `.codex-plugin/plugin.json#name = "glab"` | Codex 对插件的本地识别名；`skills: "./skills/"` 显式指向 skill 目录。 |
+| Codex Marketplace | `.agents/plugins/marketplace.json#plugins[].source.path` | Codex 本地 marketplace 如何定位 plugin 根目录。 |
+| Skill | `skills/<dir>/SKILL.md` frontmatter `name`（必须 = 父目录名） | Claude 下决定 `/glab:<name>` 后缀；Codex 下决定 skill 名称与路由语义。 |
 
 ## 8 个 Skill 索引
 
@@ -39,15 +41,16 @@
 
 目标平台：**Windows + PowerShell**（`setup` 教程仅给 Windows 分支）。但所有写临时文件的 skill 用 POSIX `/tmp/glab-mr-<iid>-*` 路径，**实际依赖 git-bash / WSL / Cygwin** 提供 `/tmp` 映射（README 未声明，见 `memory/doc-gaps.md`）。
 
-## 仓库当前状态（2026-04-30 快照）
+## 仓库当前状态（2026-05-09 快照）
 
-- `main` 分支**没有任何 commit**（`git log` 报 "no commits yet"）。
-- 工作树齐全但 `.claude-plugin/`、`.gitignore`、`README.md`、`skills/` 全部 untracked。
+- `main` 已有 5 个本地 commit，`git log --oneline --decorate -1` 显示 `origin/main` 与本地 `HEAD` 对齐。
+- 当前工作树待提交内容为：`README.md` 修改，以及新增的 `.codex-plugin/`、`.agents/`（Codex 接入相关元数据）。
 - `.claude/` 被 `.gitignore` 屏蔽，仅本机运行时状态，不入库。
-- README 第 19–25 行的"从 GitHub 拉取安装"路径目前**实际不可用**（远端无内容可拉）。
+- GitHub 远端已不再是“空仓库”状态；README 中的 GitHub 安装路径是否包含最新改动，取决于下一次 push 是否完成。
 
 ## 没有的东西（避免误解）
 
-- 无 `commands/`、`agents/`、`hooks/`、`mcp_servers/`、`.mcp.json`。
+- Claude Code 侧无 `commands/`、`agents/`、`hooks/`、`mcp_servers/`、`.mcp.json`。
+- `.agents/plugins/marketplace.json` 是 Codex marketplace 元数据，不代表仓库里存在可执行 agent 逻辑。
 - 无自动化测试 / 回归脚本 / lint 配置。
 - 仓库自身的 `llmdoc/` 是给本 plugin 用的，与 review skill 期望"被评审项目"提供的 `llmdoc/` 是两件事。

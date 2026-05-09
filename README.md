@@ -1,8 +1,8 @@
 # glab — GitLab CLI 快捷 Skill 包
 
-把日常 GitLab 操作（看 MR / 跑 CI / review / 处理 AI 反馈）封装成 Claude Code skill，**不用记 glab 命令**，跨 Claude Code 和 Codex CLI 通用。
+把日常 GitLab 操作（看 MR / 跑 CI / review / 处理 AI 反馈）封装成一组可复用 skill，**不用记 glab 命令**，同时提供 Claude Code plugin 配置与 Codex plugin 配置。
 
-> ⚠️ **当前状态**：本仓库尚未发布到 GitHub（`main` 分支无 commit）。请暂时使用下方 [Claude Code（本地路径）](#claude-code本地路径) 方式安装；[Claude Code（团队成员，从远程仓库拉取）](#claude-code团队成员从远程仓库拉取) 路径在首次 push 到 `https://github.com/itMrBoy/glab_skills.git` 之后才可用。详见 `llmdoc/memory/doc-gaps.md` 第 G1 条。
+> ℹ️ 如果你当前还没把仓库 push 到 `https://github.com/itMrBoy/glab_skills.git`，请先使用本地路径安装；远程安装路径要等首次 push 成功后才能给团队成员使用。
 
 ## 安装
 
@@ -27,9 +27,20 @@ claude plugin marketplace add itMrBoy/glab_skills
 claude plugin install glab@snow-glab-marketplace
 ```
 
-### Codex CLI（未来适配）
+### Codex CLI / Codex Plugin
 
-Codex CLI 不识别 plugin/marketplace 元数据，但识别 SKILL.md。Codex 用户在配置里把 `glab_skills/skills/` 目录加进 skill 搜索路径即可，skill 内容**完全跨工具兼容**。
+仓库现在同时包含 Codex 侧配置：
+
+- `.codex-plugin/plugin.json`：声明 `glab` plugin 及 `skills: "./skills/"`
+- `.agents/plugins/marketplace.json`：用于描述本地 Codex marketplace 插件入口
+
+如果你的 Codex 环境直接读取 repo 根下的 `.codex-plugin/plugin.json`，当前仓库已经具备最小可用的 plugin manifest。
+
+如果你准备走本地 marketplace 方式，请先确认 `.agents/plugins/marketplace.json` 里的 `source.path` 与实际 plugin 根目录一致，再接入使用。
+
+如果你的 Codex 环境还没走 plugin marketplace，也可以继续用最简单的方式：把 `glab_skills/skills/` 目录加入 Codex 的 skill 搜索路径。
+
+> 注意：本仓库的 skill 语义可在 Claude Code 与 Codex 之间复用，但 `SKILL.md` 里仍有少量 Claude Code 风格的工具名（如 `Read`、`Glob`）。在 Codex 下通常需要由 agent 自行映射等价能力，因此它是**语义可移植**，不是协议层的"完全一致"。
 
 ### 升级
 
@@ -76,7 +87,7 @@ glab auth status          # 检查认证状态
 - **不自动改用户环境**：`/glab:setup` 只检测和输出教程，不跑 winget、不写 token
 - **llmdoc 集成**：`review-mr` 和 `review-fixup` 自动检测 cwd 下 `llmdoc/`，按主题定向加载文档作为评判依据
 - **AI review 筛选**：`review-fixup` 按 `notes[].author.username == "snow_dev_ai"` 过滤评论
-- **跨工具兼容**：所有逻辑写在 SKILL.md 里，Claude Code 和 Codex CLI 都能直接用
+- **跨工具复用**：核心逻辑都写在 `SKILL.md` 里；Claude Code 可直接按 plugin 使用，Codex 可通过 plugin 或 skill 路径接入
 
 ---
 

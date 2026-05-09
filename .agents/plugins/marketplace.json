@@ -1,0 +1,19 @@
+{
+  "name": "snow-glab-marketplace",
+  "interface": {
+    "displayName": "snow-glab-marketplace"
+  },
+  "plugins": [
+    {
+      "name": "glab",
+      "source": {
+        "source": "local",
+        "path": "./plugins/glab"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      }
+    }
+  ]
+}
