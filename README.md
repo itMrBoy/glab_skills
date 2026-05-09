@@ -62,16 +62,18 @@ glab auth status          # 检查认证状态
 
 ## Skill 清单
 
-| 命令 | 自然语言触发 | 用途 |
-|---|---|---|
-| `/glab:setup` | "装 glab"、"配置 GitLab CLI" | 检测 glab 状态，输出安装与鉴权教程 |
-| `/glab:mr` | "看当前 MR"、"view current MR" | 查看当前分支对应的 MR |
-| `/glab:mr-create [target]` | "创建 MR"、"提个 PR" | 从当前分支创建 MR（默认 develop，draft 状态） |
-| `/glab:mr-diff [MR]` | "看 MR 改了啥"、"summarize MR diff" | MR 变更中文总结 |
-| `/glab:pipeline` | "看流水线"、"CI 状态" | 当前分支最新 pipeline 状态 |
-| `/glab:commits-ahead [base]` | "比 develop 多了哪些 commit" | 列本分支领先的 commits |
-| `/glab:review-mr <MR>` | "review MR 10"、"评审 MR" | 多维 review（结合 llmdoc 项目知识） |
-| `/glab:review-fixup <MR>` | "处理 AI review"、"snow_dev_ai 反馈" | 拉 AI 机器人评论 → 评估合理性 → 修复 plan |
+| Claude Code | Codex CLI 映射 | 自然语言触发 | 用途 |
+|---|---|---|---|
+| `/glab:setup` | `$glab:setup` | "装 glab"、"配置 GitLab CLI" | 检测 glab 状态，输出安装与鉴权教程 |
+| `/glab:mr` | `$glab:mr` | "看当前 MR"、"view current MR" | 查看当前分支对应的 MR |
+| `/glab:mr-create [target]` | `$glab:mr-create [target]` | "创建 MR"、"提个 PR" | 从当前分支创建 MR（默认 develop，draft 状态） |
+| `/glab:mr-diff [MR]` | `$glab:mr-diff [MR]` | "看 MR 改了啥"、"summarize MR diff" | MR 变更中文总结 |
+| `/glab:pipeline` | `$glab:pipeline` | "看流水线"、"CI 状态" | 当前分支最新 pipeline 状态 |
+| `/glab:commits-ahead [base]` | `$glab:commits-ahead [base]` | "比 develop 多了哪些 commit" | 列本分支领先的 commits |
+| `/glab:review-mr <MR>` | `$glab:review-mr <MR>` | "review MR 10"、"评审 MR" | 多维 review（结合 llmdoc 项目知识） |
+| `/glab:review-fixup <MR>` | `$glab:review-fixup <MR>` | "处理 AI review"、"snow_dev_ai 反馈" | 拉 AI 机器人评论 → 评估合理性 → 修复 plan |
+
+> 在 Codex CLI 中，如果你的环境已加载本仓库 plugin，可直接用 `$glab:<skill>` 形式点名 skill；如果没显式点名，直接用自然语言描述需求也可以触发对应 skill。
 
 ---
 
