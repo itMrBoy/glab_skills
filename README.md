@@ -2,6 +2,8 @@
 
 把日常 GitLab 操作（看 MR / 跑 CI / review / 处理 AI 反馈）封装成一组可复用 skill，**不用记 glab 命令**，同时提供 Claude Code plugin 配置与 Codex plugin 配置。
 
+> ℹ️ 一眼能看得完的 MR Review + 修复方案，就没必要使用本skill了，因为它需要扫描仓库进行判断，同时需要耗费token，时间、消费成本反而变高。
+
 ## 安装
 
 重启 Claude Code 后，输入 `/` 即可看到 `/glab:setup`、`/glab:mr` 等命令。
