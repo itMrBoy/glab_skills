@@ -23,13 +23,44 @@ glab auth status && jq --version
 
 ## 参数
 
-- MR 编号（iid）：**必填**。如果用户没传：
-  - 提示："/glab:review-fixup 需要 MR 编号，例如 `/glab:review-fixup 10`"
-  - 终止
+- MR 编号（iid）：**可选**。如果用户没传，自动推导当前分支的 open MR。
 
 ---
 
 ## 主流程
+
+### 0. 确定 MR 编号（如用户未提供）
+
+#### 0a. 获取当前分支
+
+```bash
+git rev-parse --abbrev-ref HEAD
+```
+
+- 输出为 `HEAD`（detached HEAD）：提示"当前不在分支上，无法定位 MR，请提供 MR 编号如 `/glab:review-fixup 10`"，终止
+
+#### 0b. 查找当前分支的 open MR
+
+```bash
+glab mr list --source-branch <分支名> --state opened --output json
+```
+
+- 返回空数组 `[]`：提示"当前分支 `<分支>` 没有 open 状态的 MR。请确认分支正确，或手动提供 MR 编号"，终止
+- 返回非空：取第一条的 `iid` 字段（一个分支通常只有一个 open MR）
+
+输出提示："自动定位到当前分支 MR !<iid>"
+
+#### 0c. 获取 MR 元信息
+
+无论 MR 编号是用户传入还是自动推导，都获取 MR 详情：
+
+```bash
+glab mr view <MR> --output json > /tmp/glab-mr-<MR>-info.json
+```
+
+提取 `web_url` 字段，用于最终报告头部展示。
+
+---
 
 ### 1. 拉数据
 
@@ -90,32 +121,33 @@ jq '
 - **全部 resolved**：提醒"所有 AI 评论已被标记 resolved，无需处理。仍要看的话告诉我"
 - **只有部分 resolved**：默认只处理未 resolved 的；如果用户明确要看全部，再处理
 
-### 3. 加载 llmdoc 上下文（动态、可选）
+### 3. 加载 llmdoc 相关上下文（动态、可选）
 
-检测 cwd 下 `llmdoc/index.md`：
+检测 cwd 下是否存在 llmdoc 入口：
+
+- `llmdoc/startup.md`
+- `llmdoc/index.md`
 
 #### 若存在
 
-**a. 读索引**：`Read llmdoc/index.md`
+**a. 优先按 llmdoc 启动顺序加载**：
 
-**b. 必读规范**：Glob `llmdoc/must/*.md`，全部 Read
+- 如果存在 `llmdoc/startup.md`，按其中定义的启动阅读顺序加载文档。
+- 如果没有 `llmdoc/startup.md`，读 `llmdoc/index.md`（若存在），用它做文档路由索引。
 
-**c. 编码规范**：Read `llmdoc/reference/coding-conventions.md`（若存在）
+**b. 轻量 fallback**：
 
-**d. 按 finding 涉及关键词定向加载**：
+- 读 `llmdoc/must/*.md`（若存在），作为强约束。
+- 读 `llmdoc/reference/coding-conventions.md`（若存在），作为代码风格依据。
 
-聚合所有 finding 涉及的文件路径和评论 body 关键词，匹配 index.md 描述：
+**c. 按 finding 涉及关键词定向加载**：
 
-| 关键词信号 | 加载 |
-|---|---|
-| logger / log / SnowLogger | `llmdoc/reference/snow-logger-guide.md` + `llmdoc/guides/how-to-add-snow-logger.md` |
-| 脱敏 / desensitization / mask | `llmdoc/architecture/data-desensitization-architecture.md` + `llmdoc/guides/how-to-add-desensitization-rule.md` |
-| recording / 录屏 / rrweb | `llmdoc/architecture/recording-architecture.md` + `llmdoc/guides/how-to-debug-recording.md` |
-| service worker / background / KeepServiceAlive | `llmdoc/reference/chrome-extension-mv3-guide.md` + 涉及 worker 的 architecture 文档 |
-| proxy / PAC | `llmdoc/architecture/snow-proxy-architecture.md` + `llmdoc/reference/snow-proxy-manifest-reference.md` |
-| shared / KeepServiceAlive / indexedDB | `llmdoc/architecture/shared-library-architecture.md` + `llmdoc/reference/shared-api-reference.md` + `llmdoc/reference/indexeddb-state-manager-guide.md` |
-| CI / GitLab CI / 飞书 | `llmdoc/reference/gitlab-ci-feishu-notification.md` |
-| DOM / 性能 / layout | `llmdoc/reference/chrome-dom-performance.md` |
+聚合所有 finding 涉及的文件路径、符号名和评论 body 关键词，匹配 llmdoc 索引里的文档路径和描述，加载最相关的 3-8 篇 llmdoc 文档。匹配原则：
+
+- 优先匹配文件路径中的模块名、目录名、包名、领域词。
+- 其次匹配评论 body 中反复出现的业务词、技术词、接口名、组件名、函数名。
+- 如果索引描述明确指向 `architecture/`、`guides/`、`reference/` 文档，优先加载这些文档作为评估依据。
+- 如果候选文档过多，先读最像"总览 / architecture / must / convention"的文档，再读具体 guide/reference。
 
 #### 若不存在
 
@@ -151,6 +183,7 @@ jq '
 # AI Review Fix Plan: MR !<iid>
 
 > 项目: <path_with_namespace>
+> MR 链接: <web_url>
 > 评估时间: <now>
 > 项目规范来源: <llmdoc/ 已加载 X 篇 | 未加载>
 

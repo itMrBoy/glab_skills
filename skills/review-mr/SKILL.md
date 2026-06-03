@@ -37,37 +37,40 @@ glab mr diff <iid> > /tmp/glab-mr-<iid>-diff.patch
 - 现有评论（含已有的 review 反馈）
 - 流水线状态
 
-### 2. 加载 llmdoc 上下文（动态、可选）
+### 2. 加载 llmdoc 相关上下文（动态、可选）
 
-检测 cwd 下是否存在 `llmdoc/index.md`：
+检测 cwd 下是否存在 llmdoc 入口：
 
 ```bash
-[ -f llmdoc/index.md ] && echo "EXISTS" || echo "MISSING"
+([ -f llmdoc/startup.md ] || [ -f llmdoc/index.md ]) && echo "EXISTS" || echo "MISSING"
 ```
 
 #### 若存在
 
-**a. 读索引：** `Read llmdoc/index.md` —— 这是 Markdown 表格形式，每行 `| 文档 | 描述 |`。从描述里能看出每个文档涉及的主题（logger、recording、proxy、desensitization、shared、CI 等）。
+**a. 优先按 llmdoc 启动顺序加载：**
 
-**b. 必读规范：** Glob `llmdoc/must/*.md`，全部 Read。这是项目的强约束（如 inter-extension messaging、cross-cutting patterns）。
+- 如果存在 `llmdoc/startup.md`，按其中定义的启动阅读顺序加载文档。
+- 如果没有 `llmdoc/startup.md`，读 `llmdoc/index.md`（若存在），用它做文档路由索引。
+
+**b. 轻量 fallback：**
+
+- 读 `llmdoc/must/*.md`（若存在），作为强约束。
+- 读 `llmdoc/reference/coding-conventions.md`（若存在），作为 readability 维度依据。
 
 **c. 定向加载：**
 
 从 diff 里提取关键词信号：
-- 改了哪些**文件路径**（`packages/snow-logger/src/...` → 关键词 `logger` `snow-logger`）
+- 改了哪些**文件路径**（目录名、包名、模块名、领域名）
 - 改了哪些**符号名**（函数名、类名、常量）
 - commit message / MR description 里的关键词
 
-把关键词跟 index.md 的描述做匹配，最相关的 3-5 篇文档 Read 进来。例：
-- 改了 logger → `llmdoc/reference/snow-logger-guide.md` + `llmdoc/guides/how-to-add-snow-logger.md`
-- 改了脱敏 → `llmdoc/architecture/data-desensitization-architecture.md`
-- 改了 CI → `llmdoc/reference/gitlab-ci-feishu-notification.md`
-
-**d. 编码规范：** 始终读 `llmdoc/reference/coding-conventions.md`（如存在），这是评判 readability 维度的依据。
+把关键词跟 llmdoc 索引里的文档路径和描述做匹配，最相关的 3-5 篇 llmdoc 文档 Read 进来：
+- 优先读命中当前改动领域的 `architecture/`、`guides/`、`reference/` 文档。
+- 如果候选文档过多，先读最像"总览 / must / architecture / convention"的文档。
 
 #### 若不存在
 
-跳过此步，review 只基于 diff + Claude 通用知识。**在最终报告里明确标注**："本 review 未结合项目专属规范（cwd 下未发现 `llmdoc/`）"。
+跳过此步，review 只基于 diff + 通用知识。**在最终报告里明确标注**："本 review 未结合 llmdoc 项目规范（cwd 下未发现 `llmdoc/`）"。
 
 ### 3. 六维 review
 
@@ -91,7 +94,7 @@ glab mr diff <iid> > /tmp/glab-mr-<iid>-diff.patch
 
 - 大循环 / O(N²) 是否合理？
 - 是否有不必要的复制（深拷贝、JSON.parse(JSON.stringify(...))）？
-- DOM 操作有无引发布局抖动？（如改了样式相关代码，引用 `llmdoc/reference/chrome-dom-performance.md`）
+- UI / DOM 操作有无引发布局抖动或不必要渲染？如存在相关 llmdoc，引用对应 llmdoc 文档。
 - 内存泄漏（监听器未解绑、定时器未清理、大对象未释放）？
 
 #### 维度 4：可读性（Readability）
@@ -99,7 +102,7 @@ glab mr diff <iid> > /tmp/glab-mr-<iid>-diff.patch
 - 命名是否清晰、表意？
 - 函数长度是否合理（一个函数干一件事）？
 - 注释是否在该有的地方有、不该有的地方没有（解释 why 而非 what）？
-- 是否符合 `llmdoc/reference/coding-conventions.md`（如存在）？
+- 是否符合 llmdoc 相关文档中的 coding conventions（如存在）？
 
 #### 维度 5：测试覆盖（Test Coverage）
 
@@ -111,9 +114,9 @@ glab mr diff <iid> > /tmp/glab-mr-<iid>-diff.patch
 
 只有在 llmdoc 存在时才评估。逐条对照：
 
-- `llmdoc/must/*.md` 列出的强约束有无违反？
-- 涉及主题的 `architecture/` 文档里描述的设计原则有无违反？
-- `guides/` 文档里说的标准操作步骤是否被遵循？
+- 已加载的 `llmdoc/must/*.md` 约束有无违反？
+- 已加载的 `architecture/` 文档里描述的设计原则有无违反？
+- 已加载的 `guides/` 文档里说的标准操作步骤是否被遵循？
 
 每条 finding 引用 llmdoc 文档路径作为依据。
 
