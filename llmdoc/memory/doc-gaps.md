@@ -63,4 +63,4 @@
 - `pipeline` 在新旧 glab 子命令（`glab ci ...` vs `glab pipeline ...`）之间的 fallback 决策完全交给模型，无显式判定。
 - `snow_dev_ai` username 在 `review-fixup` 与 README 里硬编码——bot 改名时需双处同步。
 - `review-mr` 给 `glab mr view --comments` 没加 `--paginate`，超长评论 MR 可能漏抓评论。
-- llmdoc 加载逻辑在 `review-mr` 与 `review-fixup` 内重复——索引格式变化要同步两处。
+- ~~llmdoc 加载逻辑在 `review-mr` 与 `review-fixup` 内重复——索引格式变化要同步两处。~~ **已缓解 (2026-06-03)**：硬编码 keyword 路由表已移除，加载策略已抽象为通用匹配原则。

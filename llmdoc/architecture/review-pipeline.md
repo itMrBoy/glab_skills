@@ -1,6 +1,6 @@
 # Review Pipeline — `review-mr` 与 `review-fixup` 双路
 
-这是 `glab` plugin 相对原生 glab 的差异化价值：把 GitLab AI bot 的产出和项目专属 `llmdoc/` 知识结合，分两条独立路径输出"评审"或"修复 plan"。两条路是**独立兄弟**，**互不调用**，但共享多套基础设施。
+这是 `glab` plugin 相对原生 glab 的差异化价值：把 GitLab AI bot 的产出和 llmdoc 项目知识结合，分两条独立路径输出"评审"或"修复 plan"。两条路是**独立兄弟**，**互不调用**，但共享多套基础设施。
 
 ## 双路对比一览
 
@@ -8,17 +8,17 @@
 |---|---|---|
 | 角色 | 主动评审任意 MR | 解析 GitLab `snow_dev_ai` bot 评论 → 评估合理性 → 修复 plan |
 | 触发短语 | review MR / 评审 MR / 帮我看看这个 MR / code review | 处理 AI review / AI review 评论 / snow_dev_ai 反馈 / fix plan for AI review |
-| MR iid | **必填**（无当前分支 fallback） | **必填**（无当前分支 fallback） |
+| MR iid | **必填**（无当前分支 fallback） | **可选**（无 iid 时自动推导当前分支 open MR） |
 | 多一道前置 | — | `jq --version` 检查 |
 | 数据获取 | `glab mr view --comments` + `glab mr diff` | `glab repo view → jq @uri → glab api .../discussions --paginate` + `glab mr diff` |
 | 是否需 jq | 否 | **是**（强依赖） |
 | 主分类 | 6 维度（correctness/security/performance/readability/test/convention） | 5 桶（🔴 valid bug / 🟡 valid improvement / ⚪ style / ⚪ false positive / 🔵 uncertain） |
 | 输出 | 评审报告 | 修复 plan（per-file/per-line + diff 块） |
-| llmdoc 加载 | 4 步（index → must → topic-targeted → coding-conventions） | 4 步同 + 8 行 keyword→doc 路由表 |
+| llmdoc 加载 | 动态加载 llmdoc 相关文档 | 动态加载 llmdoc 相关文档 |
 | 安全边界 | 不动代码、不在 GitLab 加评论 | 不动代码、不 auto resolve、不 auto push、不 auto comment |
 | `allowed-tools` | `Bash, Read, Glob, Grep` | `Bash, Read, Glob, Grep` |
 
-证据：`skills/review-mr/SKILL.md`（frontmatter、Preconditions、数据获取、llmdoc 加载、6 维度、输出模板、约束段）；`skills/review-fixup/SKILL.md`（同前 + jq 检查 + 8 行 keyword 路由表 + 5 桶分类 + plan 模板）。
+证据：`skills/review-mr/SKILL.md`（frontmatter、Preconditions、数据获取、llmdoc 加载、6 维度、输出模板、约束段）；`skills/review-fixup/SKILL.md`（同前 + jq 检查 + 5 桶分类 + plan 模板）。
 
 ## 数据获取链
 
@@ -78,22 +78,27 @@ snow_dev_ai 过滤（`skills/review-fixup/SKILL.md` 内 jq 段，写到 `/tmp/gl
 
 ## llmdoc 加载策略
 
-两个 skill 都先用 `[ -f llmdoc/index.md ] && echo "EXISTS" || echo "MISSING"` 探测被评审项目（cwd）下的 `llmdoc/`。
+两个 skill 都先探测被评审项目（cwd）下是否存在 llmdoc 入口：
 
-### review-mr：4 步策略
+- `llmdoc/startup.md`
+- `llmdoc/index.md`
 
-1. **Index** — `Read llmdoc/index.md`，按 Markdown 表 `| 文档 | 描述 |` 解析。
-2. **Must** — `Glob llmdoc/must/*.md` → 全部 Read，作为硬约束。
-3. **Topic-targeted** — 关键词信号来自三源：变更文件路径 / 变更符号名 / commit-message + MR description 关键词；与 index 描述匹配，加载最相关 3-5 篇。SKILL.md 给了 3 个示例：logger / 脱敏 / CI。
-4. **Coding conventions** — 总是读 `llmdoc/reference/coding-conventions.md`（如存在），作为 readability 维度依据。
+### 通用加载策略
 
-### review-fixup：4 步同 + 8 行明文路由表
+1. **启动顺序优先** — 如果存在 `llmdoc/startup.md`，按其中定义的启动阅读顺序加载文档。
+2. **轻量 fallback** — 如果没有 `llmdoc/startup.md`，才读 `llmdoc/index.md`、`llmdoc/must/*.md`、`llmdoc/reference/coding-conventions.md`（如存在）。
+3. **Topic-targeted** — 再根据 review 对象定向加载相关文档。`review-mr` 的关键词来自变更文件路径 / 变更符号名 / commit-message + MR description；`review-fixup` 的关键词来自所有 finding 涉及的文件路径 / 符号名 / 评论 body。
 
-关键词信号来自**所有 finding 涉及的文件路径 + 评论 body 关键词**。SKILL.md 内嵌了 8 个明文 keyword → doc 路由（`logger`、`脱敏/desensitization/mask`、`recording/录屏/rrweb`、`service worker/background/KeepServiceAlive`、`proxy/PAC`、`shared/KeepServiceAlive/indexedDB`、`CI/GitLab CI/飞书`、`DOM/性能/layout`）。`review-mr` 只有 3 个示例，`review-fixup` 有 8 行表格，**review-fixup 的 llmdoc 路由更结构化**。
+### 定向匹配原则
+
+- 优先匹配文件路径中的模块名、目录名、包名、领域词。
+- 其次匹配评论 body / MR description / commit message 中的业务词、技术词、接口名、组件名、函数名。
+- 如果索引描述明确指向 `architecture/`、`guides/`、`reference/` 文档，优先加载这些文档作为评估依据。
+- 不要在 SKILL.md 中内置某个项目的 keyword → doc 路由表；具体加载顺序由被评审项目的 llmdoc 相关文档决定。
 
 ### 缺失时降级
 
-两个 skill 都 explicit fallback：跳过加载，**报告头必须写**"未加载项目专属规范（cwd 下未发现 `llmdoc/`）"。这是 `must/working-agreement.md` 列出的可见降级要求。
+两个 skill 都 explicit fallback：跳过加载，**报告头必须标注 llmdoc 加载状态**。review-mr 写"本 review 未结合 llmdoc 项目规范（cwd 下未发现 `llmdoc/`）"；review-fixup 写"未加载 llmdoc 项目规范"。这是 `must/working-agreement.md` 列出的可见降级要求。
 
 ## 评审维度与桶分类
 
@@ -169,16 +174,15 @@ per-finding 评估流程：
 
 ## 被评审项目的 llmdoc 期望结构（消费契约）
 
-review skill 假定被评审项目 cwd 下的 `llmdoc/` 至少包含：
+review skill 优先消费被评审项目 cwd 下的 llmdoc 相关文档：
 
 | 路径 | 用途 | 缺失影响 |
 |---|---|---|
-| `llmdoc/index.md` | 探测点 + 路由索引（Markdown 表 `\| 文档 \| 描述 \|`） | 不存在 → 整个 llmdoc 加载链跳过，报告头降级标注。 |
-| `llmdoc/must/*.md` | 硬约束 | 缺失则 review-mr 第 6 维度（convention）退化为 N/A；review-fixup 5 桶失去最强 🔴 判定标准。 |
-| `llmdoc/reference/coding-conventions.md` | readability 维度依据 | 不存在则 review-mr readability 检查只能基于通用知识。 |
-| `llmdoc/architecture/*.md`、`llmdoc/guides/*.md`、`llmdoc/reference/*.md` | topic 路由目标 | 影响 review 的"项目专属性"——index 里有路由词但目标不存在时，路由失效但不影响主流程。 |
-
-> 提示：**本仓库自身的 `llmdoc/` 目前没有 `reference/coding-conventions.md`**，意味着如果用 `review-mr` 评审本仓库自己的代码，readability 维度会降级。详见 `memory/doc-gaps.md`。
+| `llmdoc/startup.md` | llmdoc 启动阅读顺序 | 缺失则使用轻量 fallback。 |
+| `llmdoc/index.md` | 文档路由索引 | 不存在 → topic 定向加载能力下降；若也无 `startup.md`，报告头降级标注。 |
+| `llmdoc/must/*.md` | 硬约束 | 缺失则 convention 判断失去最强判定标准。 |
+| `llmdoc/reference/coding-conventions.md` | readability 维度依据 | 不存在则 readability 检查只能基于已加载 llmdoc 和通用知识。 |
+| `llmdoc/architecture/*.md`、`llmdoc/guides/*.md`、`llmdoc/reference/*.md` | topic 路由目标 | 影响 review 的 llmdoc 专属性；索引里有路由词但目标不存在时，路由失效但不影响主流程。 |
 
 ## 已知 gap
 
@@ -186,7 +190,7 @@ review skill 假定被评审项目 cwd 下的 `llmdoc/` 至少包含：
 - `review-mr` 没有给 `glab mr view --comments` 加 `--paginate`，长评论列表可能截断。
 - `review-fixup` 推荐 `pnpm typecheck && pnpm test`，但无 per-project 检测逻辑。
 - review skill 工作于 whole-MR 范围，未提供按文件/按 hunk 缩窄的入参。
-- llmdoc 加载逻辑在两个 SKILL.md 内近乎复制粘贴——索引格式变更需同步。
+- llmdoc 加载框架在两个 SKILL.md 内结构相似——通用策略变更需同步两处。（已缓解：硬编码 keyword 路由表已移除）
 
 ## Related Docs
 

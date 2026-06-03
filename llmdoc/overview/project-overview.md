@@ -40,7 +40,7 @@
 
 ### C. AI review 双路（2 个 skill）
 
-`review-mr` 与 `review-fixup`。这是该插件相对原生 glab 的差异化价值：把 GitLab AI 机器人的产出和项目专属 `llmdoc/` 知识结合，给出"哪些必修、哪些可忽略、哪些待决策"的结构化输出。详见 `architecture/review-pipeline.md`。
+`review-mr` 与 `review-fixup`。这是该插件相对原生 glab 的差异化价值：把 GitLab AI 机器人的产出和 llmdoc 项目知识结合，给出"哪些必修、哪些可忽略、哪些待决策"的结构化输出。详见 `architecture/review-pipeline.md`。
 
 ### D. Plugin 骨架与分发
 
@@ -50,6 +50,6 @@
 
 1. **教程化而非自动化**——任何会改用户机器/账号的操作都返工给用户（教程文本），保留人类决策权。
 2. **plan-only 评审**——review skill 只读、不动代码、不动 GitLab 状态。
-3. **降级可见**——llmdoc 缺失时 review skill 不静默降级，必须在报告头标注"未加载项目专属规范"。
+3. **降级可见**——llmdoc 缺失时 review skill 不静默降级，必须在报告头标注"未加载 llmdoc 项目规范"。
 4. **约定优于配置**——SKILL.md frontmatter 仅 3 字段（`name` / `description` / `allowed-tools`），命令名靠目录名 + plugin name 自动拼接。
 5. **同一 skill 源，多入口接入**——Claude Code 走 plugin/marketplace，Codex 走 `.codex-plugin` 或 skill path；兼容性按语义保证，不承诺工具 ID 完全一致。

@@ -67,7 +67,7 @@ allowed-tools: Bash[, Read[, Glob[, Grep]]]
 3. 终止本 skill，不要继续
 ```
 
-`review-mr` 同模板。`review-fixup` 在前面**额外加** `jq --version` 检查（失败提示 `winget install -e --id jqlang.jq` 后终止）。`commits-ahead` 不调 glab、无此模板。
+`review-mr` 同模板。`review-fixup` 跑 `glab auth status && jq --version`（失败分别提示 setup 或 `winget install -e --id jqlang.jq` 后终止）。`commits-ahead` 不调 glab、无此模板。
 
 ### 临时文件命名
 
@@ -121,7 +121,8 @@ allowed-tools: Bash[, Read[, Glob[, Grep]]]
 | `mr-diff` | `glab mr diff <iid> > /tmp/...patch` → `glab mr view <iid>` | 文件按 5 类（测试/配置/文档/样式/源码）分组，diff>1000 行时每组前 5 + 省略；总结 ≤500 字。 |
 | `pipeline` | `glab ci status --branch <分支>`，旧版 `glab pipeline ...` 回退 | 默认当前分支；禁止 auto retry 与拉完整 trace。 |
 | `commits-ahead` | `git rev-parse --verify <base>` → `git log <base>..HEAD --oneline --no-merges` → `git diff <base>..HEAD --stat` | base 默认 `develop`，"上游"用 `@{u}`；不调 glab；调试性提交关键词：wip/fixup/squash/fix typo/test/调试/临时/debug/字数<5。 |
-| `review-mr` / `review-fixup` | 见 `review-pipeline.md` | iid 必填。 |
+| `review-mr` | 见 `review-pipeline.md` | iid 必填。 |
+| `review-fixup` | 见 `review-pipeline.md` | iid 可选（无 iid 时自动推导当前分支 open MR）。 |
 
 ## 已知耦合点
 

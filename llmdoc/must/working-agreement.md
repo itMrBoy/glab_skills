@@ -33,7 +33,7 @@
 - **glab 未装/未认证**：依赖 glab 的 7 个 skill 在 Preconditions 段调 `glab auth status`，失败 → 调 `/glab:setup` 输出教程 → **终止本 skill**，不要绕过。
 - **`commits-ahead` 例外**：纯本地 git，不调 `setup`。
 - **`review-fixup` 多一道 jq 检查**：`jq --version` 失败 → 提示用户 `winget install -e --id jqlang.jq` → 终止。
-- **llmdoc 缺失（仅 review skill）**：`[ -f llmdoc/index.md ]` 不存在时跳过加载，仍可运行；**报告头必须标注"未加载项目专属规范"**。不要静默降级。
+- **llmdoc 相关文档缺失（仅 review skill）**：`llmdoc/startup.md`、`llmdoc/index.md` 均不存在时跳过 llmdoc 加载，仍可运行；**报告头必须标注"未加载 llmdoc 项目规范"**。不要静默降级。
 
 ## 临时文件约定
 
@@ -55,4 +55,5 @@ frontmatter `allowed-tools` 用 PascalCase：`Bash`、`Read`、`Glob`、`Grep`�
 - `commits-ahead [base]` → `develop`（说"上游"则用 `@{u}`）
 - `mr-diff [MR]` → 当前分支推断
 - `pipeline` → 当前分支
-- `review-mr <MR>` / `review-fixup <MR>` → **必填**，缺失时提示用户先跑 `/glab:mr` 拿 iid。
+- `review-mr <MR>` → **必填**，缺失时提示用户先跑 `/glab:mr` 拿 iid。
+- `review-fixup [MR]` → **可选**，无 iid 时自动推导当前分支 open MR。
