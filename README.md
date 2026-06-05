@@ -4,6 +4,20 @@
 
 > ℹ️ 一眼能看得完的 MR Review + 修复方案，就没必要使用本skill了，因为它需要扫描仓库进行判断，同时需要耗费token，时间、消费成本反而变高。
 
+## 写在前面：llmdoc 的作用与推荐
+
+`llmdoc/` 是给 AI agent 看的项目知识库，用来沉淀项目背景、架构边界、工作约定、历史决策和常见问题。`review-mr`、`review-fixup` 这类 skill 会优先检测当前仓库下是否存在 `llmdoc/`，并按文档路由加载相关规范，把 review 从“只看 diff”升级为“结合项目上下文判断”。
+
+推荐在以下场景为业务项目补充 `llmdoc/`：
+
+- 项目有明确架构约束、权限规则、数据流或团队约定，单靠 MR diff 容易误判。
+- 希望 AI review 能识别“符合当前项目规范”与“看起来通用但不适合本项目”的差异。
+- 需要持续处理 AI review 反馈，希望修复建议能复用历史决策，而不是每次重新解释背景。
+
+如果项目还没有 `llmdoc/`，相关 review skill 仍然可以运行，但会标注“未加载 llmdoc 项目规范”，此时结论主要基于代码 diff、通用工程经验和当前可见上下文。
+
+推荐安装并使用独立的 llmdoc skill 包来初始化和维护项目文档：<https://github.com/TokenRollAI/llmdoc>。
+
 ## 安装
 
 重启 Claude Code 后，输入 `/` 即可看到 `/glab:setup`、`/glab:mr` 等命令。
